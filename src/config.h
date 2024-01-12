@@ -55,9 +55,9 @@
 // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
 #define SUPPORT_WINMM_HIGHRES_TIMER     1
 // Use busy wait loop for timing sync, if not defined, a high-resolution timer is set up and used
-//#define SUPPORT_BUSY_WAIT_LOOP          1
+#define SUPPORT_BUSY_WAIT_LOOP          1
 // Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy
-#define SUPPORT_PARTIALBUSY_WAIT_LOOP    1
+//#define SUPPORT_PARTIALBUSY_WAIT_LOOP    1
 // Allow automatic screen capture of current screen pressing F12, defined in KeyCallback()
 #define SUPPORT_SCREEN_CAPTURE          1
 // Allow automatic gif recording of current screen pressing CTRL+F12, defined in KeyCallback()
@@ -150,7 +150,7 @@
 #define SUPPORT_FILEFORMAT_PNG      1
 //#define SUPPORT_FILEFORMAT_BMP      1
 //#define SUPPORT_FILEFORMAT_TGA      1
-//#define SUPPORT_FILEFORMAT_JPG      1
+#define SUPPORT_FILEFORMAT_JPG      1
 #define SUPPORT_FILEFORMAT_GIF      1
 #define SUPPORT_FILEFORMAT_QOI      1
 //#define SUPPORT_FILEFORMAT_PSD      1

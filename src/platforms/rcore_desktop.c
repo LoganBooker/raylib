@@ -1323,7 +1323,8 @@ int InitPlatform(void)
     {
         // NOTE: MSAA is only enabled for main framebuffer, not user-created FBOs
         TRACELOG(LOG_INFO, "DISPLAY: Trying to enable MSAA x4");
-        glfwWindowHint(GLFW_SAMPLES, 4);   // Tries to enable multisampling x4 (MSAA), default is 0
+        glfwWindowHint(GLFW_SAMPLES, 8);   // Tries to enable multisampling x4 (MSAA), default is 0
+        glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);   // Tries to enable multisampling x4 (MSAA), default is 0
     }
 
     // NOTE: When asking for an OpenGL context version, most drivers provide the highest supported version

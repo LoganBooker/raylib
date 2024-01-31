@@ -53,7 +53,7 @@
 //#define SUPPORT_SSH_KEYBOARD_RPI        1
 // Setting a higher resolution can improve the accuracy of time-out intervals in wait functions.
 // However, it can also reduce overall system performance, because the thread scheduler switches tasks more often.
-//#define SUPPORT_WINMM_HIGHRES_TIMER     1
+#define SUPPORT_WINMM_HIGHRES_TIMER     1
 // Use busy wait loop for timing sync, if not defined, a high-resolution timer is set up and used
 //#define SUPPORT_BUSY_WAIT_LOOP          1
 // Use a partial-busy wait loop, in this case frame sleeps for most of the time, but then runs a busy loop at the end for accuracy

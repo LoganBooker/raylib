@@ -221,8 +221,8 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     #GRAPHICS ?= GRAPHICS_API_OPENGL_33
     #GRAPHICS = GRAPHICS_API_OPENGL_11      # Uncomment to use OpenGL 1.1
     #GRAPHICS = GRAPHICS_API_OPENGL_21      # Uncomment to use OpenGL 2.1
-    GRAPHICS ?= GRAPHICS_API_OPENGL_43      # Uncomment to use OpenGL 4.3
-    #GRAPHICS ?= GRAPHICS_API_OPENGL_ES2     # Uncomment to use OpenGL ES 2.0 (ANGLE)
+    #GRAPHICS ?= GRAPHICS_API_OPENGL_43      # Uncomment to use OpenGL 4.3
+    GRAPHICS ?= GRAPHICS_API_OPENGL_ES2     # Uncomment to use OpenGL ES 2.0 (ANGLE)
 endif
 ifeq ($(PLATFORM),PLATFORM_DESKTOP_SDL)
     # By default use OpenGL 3.3 on desktop platform with SDL backend

@@ -3975,6 +3975,31 @@ void UnloadRenderTexture(RenderTexture2D target)
     }
 }
 
+PixelBufferObject LoadPixelBufferObject(int size)
+{
+    PixelBufferObject pbo = { 0 };
+    
+    pbo.id = rlLoadPixelBufferObject(size);
+    pbo.size = size;
+
+    return pbo;
+}
+
+void UnloadPixelBufferObject(PixelBufferObject pbo)
+{
+    if (pbo.id > 0)
+    {
+        rlUnloadPixelBufferObject(pbo.id);
+    }
+}
+
+// Update GPU texture with new data
+// NOTE: pixels data must match texture.format
+void UpdateTextureFast(Texture2D texture, PixelBufferObject pbo, const void* pixels)
+{
+    rlUpdateTextureFast(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo.id, pbo.size, pixels);
+}
+
 // Update GPU texture with new data
 // NOTE: pixels data must match texture.format
 void UpdateTexture(Texture2D texture, const void *pixels)

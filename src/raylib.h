@@ -271,6 +271,11 @@ typedef struct Texture {
     int format;             // Data format (PixelFormat type)
 } Texture;
 
+typedef struct PixelBufferObject {
+    unsigned int id;        // OpenGL texture id
+    int size;
+} PixelBufferObject;
+
 // Texture2D, same as Texture
 typedef Texture Texture2D;
 
@@ -1389,8 +1394,13 @@ RLAPI bool IsTextureReady(Texture2D texture);                                   
 RLAPI void UnloadTexture(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
 RLAPI bool IsRenderTextureReady(RenderTexture2D target);                                                 // Check if a render texture is ready
 RLAPI void UnloadRenderTexture(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
+RLAPI void UpdateTextureFast(Texture2D texture, PixelBufferObject pbo, const void* pixels);
 RLAPI void UpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
 RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
+
+// PBO functions
+RLAPI PixelBufferObject LoadPixelBufferObject(int size);
+RLAPI void UnloadPixelBufferObject(PixelBufferObject pbo);
 
 // Texture configuration functions
 RLAPI void GenTextureMipmaps(Texture2D *texture);                                                        // Generate GPU mipmaps for a texture

@@ -709,6 +709,7 @@ RLAPI void rlDrawVertexArrayElementsInstanced(int offset, int count, const void 
 RLAPI unsigned int rlLoadTexture(const void *data, int width, int height, int format, int mipmapCount); // Load texture data
 RLAPI unsigned int rlLoadTextureDepth(int width, int height, bool useRenderBuffer); // Load depth texture/renderbuffer (to be attached to fbo)
 RLAPI unsigned int rlLoadTextureCubemap(const void *data, int size, int format); // Load texture cubemap data
+RLAPI void rlUpdateTextureFast(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data);
 RLAPI void rlUpdateTexture(unsigned int id, int offsetX, int offsetY, int width, int height, int format, const void *data); // Update texture with new data on GPU
 RLAPI void rlGetGlTextureFormats(int format, unsigned int *glInternalFormat, unsigned int *glFormat, unsigned int *glType); // Get OpenGL internal formats
 RLAPI const char *rlGetPixelFormatName(unsigned int format);              // Get name string for pixel format
@@ -716,6 +717,10 @@ RLAPI void rlUnloadTexture(unsigned int id);                              // Unl
 RLAPI void rlGenTextureMipmaps(unsigned int id, int width, int height, int format, int *mipmaps); // Generate mipmap data for selected texture
 RLAPI void *rlReadTexturePixels(unsigned int id, int width, int height, int format); // Read texture pixel data
 RLAPI unsigned char *rlReadScreenPixels(int width, int height);           // Read screen pixel data (color buffer)
+
+// Pixelbuffer management (fbo)
+RLAPI void rlUnloadPixelBufferObject(unsigned int id);
+RLAPI unsigned int rlLoadPixelBufferObject(int size);
 
 // Framebuffer management (fbo)
 RLAPI unsigned int rlLoadFramebuffer(int width, int height);              // Load an empty framebuffer
@@ -777,6 +782,8 @@ RLAPI void rlLoadDrawQuad(void);     // Load and draw a quad
 *   RLGL IMPLEMENTATION
 *
 ************************************************************************************/
+
+#define RLGL_IMPLEMENTATION
 
 #if defined(RLGL_IMPLEMENTATION)
 
@@ -3285,9 +3292,59 @@ unsigned int rlLoadTextureCubemap(const void *data, int size, int format)
     return id;
 }
 
+void rlUpdateTextureFast(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data)
+{
+    unsigned int glInternalFormat, glFormat, glType;
+    rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
+
+    if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
+    {
+        // Bind the PBO for this operation
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId);
+
+        // Map the buffer object into client's memory
+        // Note: glMapBufferRange() could offer more control over the mapping
+        void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        if (ptr) {
+            // Copy data to the PBO
+            memcpy(ptr, data, size); // Adjust the size as necessary
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+            // Now update the texture object with the PBO
+            glBindTexture(GL_TEXTURE_2D, id);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
+        }
+        else {
+            TRACELOG(RL_LOG_WARNING, "PBO: Failed to map buffer for texture update");
+        }
+
+        // Unbind the PBO to avoid affecting subsequent OpenGL operations
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+    else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
+}
+
+unsigned int rlLoadPixelBufferObject(int size)
+{
+    unsigned int pbo;
+    glGenBuffers(1, &pbo);
+
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW); // Adjust size as needed
+
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    return pbo;
+}
+
+void rlUnloadPixelBufferObject(unsigned int id)
+{
+    glDeleteBuffers(1, &id);
+}
+
 // Update already loaded texture in GPU with new data
 // NOTE: We don't know safely if internal texture format is the expected one...
-void rlUpdateTexture(unsigned int id, int offsetX, int offsetY, int width, int height, int format, const void *data)
+void rlUpdateTexture(unsigned int id, int offsetX, int offsetY, int width, int height, int format, const void* data)
 {
     glBindTexture(GL_TEXTURE_2D, id);
 

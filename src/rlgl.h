@@ -3303,7 +3303,7 @@ void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, i
 
         // Map the buffer object into client's memory
         // Note: glMapBufferRange() could offer more control over the mapping
-        void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         if (ptr) {
             // Copy data to the PBO
             memcpy(ptr, data, size); // Adjust the size as necessary
@@ -3330,27 +3330,24 @@ void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, i
 
     if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
     {
-        // Bind the PBO for this operation
+        // Bind the texture
         glBindTexture(GL_TEXTURE_2D, id);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId0);
 
+        // Bind the current PBO to update the texture
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId0);
         glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
 
+        // Bind the next PBO to map and upload data
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId1);
+        // Optionally resize or orphan the buffer
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
 
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, size, 0, GL_STREAM_DRAW);
-
-        // Map the buffer object into client's memory
-        // Note: glMapBufferRange() could offer more control over the mapping
-        void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        // Use glMapBufferRange for better control and performance
+        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         if (ptr) {
             // Copy data to the PBO
-            memcpy(ptr, data, size); // Adjust the size as necessary
+            memcpy(ptr, data, size);
             glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-            // Now update the texture object with the PBO
-            //glBindTexture(GL_TEXTURE_2D, id);
-            //glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
         }
         else {
             TRACELOG(RL_LOG_WARNING, "PBO: Failed to map buffer for texture update");

@@ -3344,7 +3344,7 @@ void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, i
         // glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
 
         // Use glMapBufferRange for better control and performance
-        void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
         if (ptr) {
             // Copy data to the PBO
             memcpy(ptr, data, size);

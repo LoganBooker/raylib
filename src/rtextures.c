@@ -3995,9 +3995,14 @@ void UnloadPixelBufferObject(PixelBufferObject pbo)
 
 // Update GPU texture with new data
 // NOTE: pixels data must match texture.format
-void UpdateTextureFast(Texture2D texture, PixelBufferObject pbo, const void* pixels)
+void UpdateTextureWithPBO(Texture2D texture, PixelBufferObject pbo, const void* pixels)
 {
-    rlUpdateTextureFast(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo.id, pbo.size, pixels);
+    rlUpdateTexturePbo1(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo.id, pbo.size, pixels);
+}
+
+void UpdateTextureWithPBOs(Texture2D texture, PixelBufferObject pbo0, PixelBufferObject pbo1, const void* pixels)
+{
+    rlUpdateTexturePbo2(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo0.id, pbo1.size, pixels);
 }
 
 // Update GPU texture with new data

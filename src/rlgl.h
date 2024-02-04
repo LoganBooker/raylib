@@ -709,7 +709,8 @@ RLAPI void rlDrawVertexArrayElementsInstanced(int offset, int count, const void 
 RLAPI unsigned int rlLoadTexture(const void *data, int width, int height, int format, int mipmapCount); // Load texture data
 RLAPI unsigned int rlLoadTextureDepth(int width, int height, bool useRenderBuffer); // Load depth texture/renderbuffer (to be attached to fbo)
 RLAPI unsigned int rlLoadTextureCubemap(const void *data, int size, int format); // Load texture cubemap data
-RLAPI void rlUpdateTextureFast(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data);
+RLAPI void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data);
+RLAPI void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId0, unsigned int pboId1, int size, const void* data);
 RLAPI void rlUpdateTexture(unsigned int id, int offsetX, int offsetY, int width, int height, int format, const void *data); // Update texture with new data on GPU
 RLAPI void rlGetGlTextureFormats(int format, unsigned int *glInternalFormat, unsigned int *glFormat, unsigned int *glType); // Get OpenGL internal formats
 RLAPI const char *rlGetPixelFormatName(unsigned int format);              // Get name string for pixel format
@@ -3290,7 +3291,7 @@ unsigned int rlLoadTextureCubemap(const void *data, int size, int format)
     return id;
 }
 
-void rlUpdateTextureFast(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data)
+void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data)
 {
     unsigned int glInternalFormat, glFormat, glType;
     rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
@@ -3311,6 +3312,45 @@ void rlUpdateTextureFast(unsigned int id, int offsetX, int offsetY, int width, i
             // Now update the texture object with the PBO
             glBindTexture(GL_TEXTURE_2D, id);
             glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
+        }
+        else {
+            TRACELOG(RL_LOG_WARNING, "PBO: Failed to map buffer for texture update");
+        }
+
+        // Unbind the PBO to avoid affecting subsequent OpenGL operations
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+    else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
+}
+
+void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId0, unsigned int pboId1, int size, const void* data)
+{
+    unsigned int glInternalFormat, glFormat, glType;
+    rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
+
+    if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
+    {
+        // Bind the PBO for this operation
+        glBindTexture(GL_TEXTURE_2D, id);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId0);
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId1);
+
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, DATA_SIZE, 0, GL_STREAM_DRAW);
+
+        // Map the buffer object into client's memory
+        // Note: glMapBufferRange() could offer more control over the mapping
+        void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        if (ptr) {
+            // Copy data to the PBO
+            memcpy(ptr, data, size); // Adjust the size as necessary
+            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+            // Now update the texture object with the PBO
+            //glBindTexture(GL_TEXTURE_2D, id);
+            //glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
         }
         else {
             TRACELOG(RL_LOG_WARNING, "PBO: Failed to map buffer for texture update");

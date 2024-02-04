@@ -1394,7 +1394,8 @@ RLAPI bool IsTextureReady(Texture2D texture);                                   
 RLAPI void UnloadTexture(Texture2D texture);                                                             // Unload texture from GPU memory (VRAM)
 RLAPI bool IsRenderTextureReady(RenderTexture2D target);                                                 // Check if a render texture is ready
 RLAPI void UnloadRenderTexture(RenderTexture2D target);                                                  // Unload render texture from GPU memory (VRAM)
-RLAPI void UpdateTextureFast(Texture2D texture, PixelBufferObject pbo, const void* pixels);
+RLAPI void UpdateTextureWithPBO(Texture2D texture, PixelBufferObject pbo, const void* pixels);
+RLAPI void UpdateTextureWithPBOs(Texture2D texture, PixelBufferObject pbo0, PixelBufferObject pbo1, const void* pixels);
 RLAPI void UpdateTexture(Texture2D texture, const void *pixels);                                         // Update GPU texture with new data
 RLAPI void UpdateTextureRec(Texture2D texture, Rectangle rec, const void *pixels);                       // Update GPU texture rectangle with new data
 

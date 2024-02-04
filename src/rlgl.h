@@ -3338,7 +3338,7 @@ void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, i
 
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId1);
 
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, DATA_SIZE, 0, GL_STREAM_DRAW);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, size, 0, GL_STREAM_DRAW);
 
         // Map the buffer object into client's memory
         // Note: glMapBufferRange() could offer more control over the mapping

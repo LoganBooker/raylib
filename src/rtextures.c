@@ -4002,7 +4002,7 @@ void UpdateTextureWithPBO(Texture2D texture, PixelBufferObject pbo, const void* 
 
 void UpdateTextureWithPBOs(Texture2D texture, PixelBufferObject pbo0, PixelBufferObject pbo1, const void* pixels)
 {
-    rlUpdateTexturePbo2(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo0.id, pbo1.size, pixels);
+    rlUpdateTexturePbo2(texture.id, 0, 0, texture.width, texture.height, texture.format, pbo0.id, pbo1.id, pbo0.size, pixels);
 }
 
 // Update GPU texture with new data

@@ -709,8 +709,6 @@ RLAPI void rlDrawVertexArrayElementsInstanced(int offset, int count, const void 
 RLAPI unsigned int rlLoadTexture(const void *data, int width, int height, int format, int mipmapCount); // Load texture data
 RLAPI unsigned int rlLoadTextureDepth(int width, int height, bool useRenderBuffer); // Load depth texture/renderbuffer (to be attached to fbo)
 RLAPI unsigned int rlLoadTextureCubemap(const void *data, int size, int format); // Load texture cubemap data
-RLAPI void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data);
-RLAPI void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId0, unsigned int pboId1, int size, const void* data);
 RLAPI void rlUpdateTexture(unsigned int id, int offsetX, int offsetY, int width, int height, int format, const void *data); // Update texture with new data on GPU
 RLAPI void rlGetGlTextureFormats(int format, unsigned int *glInternalFormat, unsigned int *glFormat, unsigned int *glType); // Get OpenGL internal formats
 RLAPI const char *rlGetPixelFormatName(unsigned int format);              // Get name string for pixel format
@@ -718,6 +716,12 @@ RLAPI void rlUnloadTexture(unsigned int id);                              // Unl
 RLAPI void rlGenTextureMipmaps(unsigned int id, int width, int height, int format, int *mipmaps); // Generate mipmap data for selected texture
 RLAPI void *rlReadTexturePixels(unsigned int id, int width, int height, int format); // Read texture pixel data
 RLAPI unsigned char *rlReadScreenPixels(int width, int height);           // Read screen pixel data (color buffer)
+
+RLAPI void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data);
+RLAPI void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId0, unsigned int pboId1, int size, const void* data);
+
+RLAPI void* rlBeginUnsafePboTextureUpdate(unsigned int id, int format, unsigned int pboId, int size);
+RLAPI void rlEndUnsafePboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format);
 
 // Pixelbuffer management (fbo)
 RLAPI void rlUnloadPixelBufferObject(unsigned int id);
@@ -3289,6 +3293,48 @@ unsigned int rlLoadTextureCubemap(const void *data, int size, int format)
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: Failed to load cubemap texture");
 
     return id;
+}
+
+void* rlBeginUnsafePboTextureUpdate(unsigned int id, int format, unsigned int pboId, int size)
+{
+    unsigned int glInternalFormat, glFormat, glType;
+    rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
+
+    if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
+    {
+        // Bind the PBO for this operation
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboId);
+
+        // Optionally resize or orphan the buffer
+        // glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
+
+        // Map the buffer object into client's memory
+        // Note: glMapBufferRange() could offer more control over the mapping
+        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+        return ptr;
+    }
+    else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
+
+    return NULL;
+}
+
+void rlEndUnsafePboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format)
+{
+    unsigned int glInternalFormat, glFormat, glType;
+    rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
+
+    if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
+    {
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+        // Now update the texture object with the PBO
+        glBindTexture(GL_TEXTURE_2D, id);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
+
+        // Unbind the PBO to avoid affecting subsequent OpenGL operations
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+    else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
 }
 
 void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int pboId, int size, const void* data)

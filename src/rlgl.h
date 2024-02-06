@@ -3390,7 +3390,7 @@ void* rlBeginUnsafeBufferedPboTextureUpdate(unsigned int id, int offsetX, int of
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, writePboId);
 
         // Use glMapBufferRange for better control and performance
-        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+        void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         if (ptr) 
         {
             return ptr;
@@ -3451,7 +3451,7 @@ unsigned int rlLoadPixelBufferObject(int size)
     glGenBuffers(1, &pbo);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW); // Adjust size as needed
+    glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_DYNAMIC_STORAGE_BIT | GL_MAP_COHERENT_BIT);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 

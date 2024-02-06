@@ -3485,6 +3485,10 @@ unsigned int rlLoadPixelBufferObject(int size, void **ptr)
 
 void rlUnloadPixelBufferObject(unsigned int id)
 {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, id);
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
     glDeleteBuffers(1, &id);
 }
 

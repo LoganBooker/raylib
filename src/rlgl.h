@@ -728,7 +728,8 @@ RLAPI void rlEndUnsafeBufferedPboTextureUpdate();
 
 // Pixelbuffer management (fbo)
 RLAPI void rlUnloadPixelBufferObject(unsigned int id);
-RLAPI unsigned int rlLoadPixelBufferObject(int size);
+RLAPI unsigned int rlLoadPixelBufferObject(int size, void *ptr);
+RLAPI void rlUnsafePboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int readPboId, int size);
 
 // Framebuffer management (fbo)
 RLAPI unsigned int rlLoadFramebuffer(int width, int height);              // Load an empty framebuffer
@@ -3372,6 +3373,27 @@ void rlUpdateTexturePbo1(unsigned int id, int offsetX, int offsetY, int width, i
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
 }
 
+void rlUnsafePboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int readPboId, int size)
+{
+    unsigned int glInternalFormat, glFormat, glType;
+    rlGetGlTextureFormats(format, &glInternalFormat, &glFormat, &glType);
+
+    if ((glInternalFormat != 0) && (format < RL_PIXELFORMAT_COMPRESSED_DXT1_RGB))
+    {
+        // Bind the texture
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        // Bind the current PBO to update the texture
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, readPboId);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, glFormat, glType, 0);
+
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+    else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
+
+    return NULL;
+}
+
 void* rlBeginUnsafeBufferedPboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int readPboId, unsigned int writePboId, int size)
 {
     unsigned int glInternalFormat, glFormat, glType;
@@ -3445,13 +3467,15 @@ void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, i
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
 }
 
-unsigned int rlLoadPixelBufferObject(int size)
+unsigned int rlLoadPixelBufferObject(int size, void *ptr)
 {
     unsigned int pbo;
     glGenBuffers(1, &pbo);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
     glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_DYNAMIC_STORAGE_BIT | GL_MAP_COHERENT_BIT);
+
+    ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 

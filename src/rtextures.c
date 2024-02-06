@@ -3979,8 +3979,10 @@ PixelBufferObject LoadPixelBufferObject(int size)
 {
     PixelBufferObject pbo = { 0 };
     
-    pbo.id = rlLoadPixelBufferObject(size);
+    void* ptr;
+    pbo.id = rlLoadPixelBufferObject(size, &ptr);
     pbo.size = size;
+    pbo.data = ptr;
 
     return pbo;
 }
@@ -4023,6 +4025,11 @@ void* BeginUnsafeBufferedTextureUpdate(Texture2D texture, PixelBufferObject read
 void EndUnsafeBufferedTextureUpdate()
 {
     rlEndUnsafeBufferedPboTextureUpdate();
+}
+
+void UnsafeTextureUpdate(Texture2D texture, PixelBufferObject readPbo)
+{
+    rlUnsafePboTextureUpdate(texture.id, 0, 0, texture.width, texture.height, texture.format, readPbo.id, readPbo.size);
 }
 
 // Update GPU texture with new data

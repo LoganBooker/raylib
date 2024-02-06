@@ -274,6 +274,7 @@ typedef struct Texture {
 typedef struct PixelBufferObject {
     unsigned int id;        // OpenGL texture id
     int size;
+    void* data;
 } PixelBufferObject;
 
 // Texture2D, same as Texture
@@ -1405,6 +1406,7 @@ RLAPI void EndUnsafeTextureUpdate(Texture2D texture);
 
 RLAPI void* BeginUnsafeBufferedTextureUpdate(Texture2D texture, PixelBufferObject readPbo, PixelBufferObject writePbo);
 RLAPI void EndUnsafeBufferedTextureUpdate();
+RLAPI void UnsafeTextureUpdate(Texture2D texture, PixelBufferObject readPbo);
 
 // PBO functions
 RLAPI PixelBufferObject LoadPixelBufferObject(int size);

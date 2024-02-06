@@ -728,7 +728,7 @@ RLAPI void rlEndUnsafeBufferedPboTextureUpdate();
 
 // Pixelbuffer management (fbo)
 RLAPI void rlUnloadPixelBufferObject(unsigned int id);
-RLAPI unsigned int rlLoadPixelBufferObject(int size, void *ptr);
+RLAPI unsigned int rlLoadPixelBufferObject(int size, void **ptr);
 RLAPI void rlUnsafePboTextureUpdate(unsigned int id, int offsetX, int offsetY, int width, int height, int format, unsigned int readPboId, int size);
 
 // Framebuffer management (fbo)

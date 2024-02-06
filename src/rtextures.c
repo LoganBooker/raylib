@@ -4027,7 +4027,7 @@ void EndUnsafeBufferedTextureUpdate()
 
 void UnsafeTextureUpdate(Texture2D texture, PixelBufferObject readPbo)
 {
-    rlUnsafePboTextureUpdate(texture.id, 0, 0, texture.width, texture.height, texture.format, readPbo.id, readPbo.size);
+    rlUnsafePboTextureUpdate(texture.id, 0, 0, texture.width, texture.height, texture.format, readPbo.id);
 }
 
 // Update GPU texture with new data

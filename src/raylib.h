@@ -1403,6 +1403,9 @@ RLAPI void UpdateTextureWithPBOs(Texture2D texture, PixelBufferObject pbo0, Pixe
 RLAPI void* BeginUnsafeTextureUpdate(Texture2D texture, PixelBufferObject pbo);
 RLAPI void EndUnsafeTextureUpdate(Texture2D texture);
 
+RLAPI void* BeginUnsafeBufferedTextureUpdate(Texture2D texture, PixelBufferObject readPbo, PixelBufferObject writePbo);
+RLAPI void EndUnsafeBufferedTextureUpdate();
+
 // PBO functions
 RLAPI PixelBufferObject LoadPixelBufferObject(int size);
 RLAPI void UnloadPixelBufferObject(PixelBufferObject pbo);

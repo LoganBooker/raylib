@@ -4015,6 +4015,16 @@ void EndUnsafeTextureUpdate(Texture2D texture)
     rlEndUnsafePboTextureUpdate(texture.id, 0, 0, texture.width, texture.height, texture.format);
 }
 
+void* BeginUnsafeBufferedTextureUpdate(Texture2D texture, PixelBufferObject readPbo, PixelBufferObject writePbo)
+{
+    return rlBeginUnsafeBufferedPboTextureUpdate(texture.id, 0, 0, texture.width, texture.height, texture.format, readPbo.id, writePbo.od, readPbo.size);
+}
+
+void EndUnsafeBufferedTextureUpdate()
+{
+    rlEndUnsafeBufferedPboTextureUpdate();
+}
+
 // Update GPU texture with new data
 // NOTE: pixels data must match texture.format
 void UpdateTexture(Texture2D texture, const void *pixels)

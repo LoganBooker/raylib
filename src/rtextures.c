@@ -4007,7 +4007,7 @@ void UpdateTextureWithPBOs(Texture2D texture, PixelBufferObject pbo0, PixelBuffe
 
 void* BeginUnsafeTextureUpdate(Texture2D texture, PixelBufferObject pbo)
 {
-    return rlBeginUnsafePboTextureUpdate(texture.id, texture.height, pbo.id, pbo.size);
+    return rlBeginUnsafePboTextureUpdate(texture.id, texture.format, pbo.id, pbo.size);
 }
 
 void EndUnsafeTextureUpdate(Texture2D texture)

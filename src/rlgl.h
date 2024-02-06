@@ -3467,15 +3467,18 @@ void rlUpdateTexturePbo2(unsigned int id, int offsetX, int offsetY, int width, i
     else TRACELOG(RL_LOG_WARNING, "TEXTURE: [ID %i] Failed to update for current texture format (%i)", id, format);
 }
 
-unsigned int rlLoadPixelBufferObject(int size, void *ptr)
+unsigned int rlLoadPixelBufferObject(int size, void **ptr)
 {
     unsigned int pbo;
     glGenBuffers(1, &pbo);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
-    glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_DYNAMIC_STORAGE_BIT | GL_MAP_COHERENT_BIT);
+    glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
-    ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    void* mappedPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+    if (ptr) {
+        *ptr = mappedPtr;
+    }
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 

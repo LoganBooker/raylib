@@ -3979,10 +3979,8 @@ PixelBufferObject LoadPixelBufferObject(int size)
 {
     PixelBufferObject pbo = { 0 };
     
-    void* ptr;
-    pbo.id = rlLoadPixelBufferObject(size, &ptr);
+    pbo.id = rlLoadPixelBufferObject(size, &pbo.data);
     pbo.size = size;
-    pbo.data = ptr;
 
     return pbo;
 }
